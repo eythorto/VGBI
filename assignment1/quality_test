@@ -1,0 +1,61 @@
+-- Get number of records in both tables
+SELECT COUNT(*) AS Total_accident_rows from Accidents;
+SELECT COUNT(*) AS Total_tourist_rows from Tourists;
+
+-- Get sum and average of accidents
+SELECT 
+    SUM(accident_count) AS Sum_of_accidents,
+    AVG(accident_count) AS Average_accident_count
+from Accidents;
+
+-- Get sum and average of tourists
+SELECT 
+    SUM(tourist_count) AS Sum_of_tourists,
+    AVG(tourist_count) AS Average_tourist_count
+from Tourists;
+
+-- Get datatypes of columns in Accidents table
+SELECT COLUMN_NAME AS Accidents_Column_name, DATA_TYPE AS Accidents_Data_type
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'Accidents';
+
+-- Get datatypes of columns in Tourists table
+SELECT COLUMN_NAME AS Tourists_Column_name, DATA_TYPE AS Tourists_Data_type
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'Tourists';
+
+-- Extra quality checks
+-- Check for any missing values in Accidents table to check data quality
+SELECT 
+    SUM(CASE WHEN accident_count IS NULL THEN 1 ELSE 0 END) AS Missing_accident_count
+FROM Accidents;
+
+-- Check for any missing values in Tourists table to check data quality
+SELECT 
+    SUM(CASE WHEN tourist_count IS NULL THEN 1 ELSE 0 END) AS Missing_tourist_count
+FROM Tourists;
+
+-- Check for duplicate year_months in Accidents table
+SELECT year_month, COUNT(*) AS Duplicate_Accident_count
+FROM Accidents
+GROUP BY year_month
+HAVING COUNT(*) > 1;
+
+-- Check for duplicate year_months in Tourists table
+SELECT year_month, COUNT(*) AS Duplicate_Tourist_count
+FROM Tourists
+GROUP BY year_month
+HAVING COUNT(*) > 1;
+
+-- Verify data ranges for year_month in Accidents table
+SELECT * 
+FROM Accidents
+WHERE year_month < '2014-01' OR year_month > '2024-12';
+
+-- Verify data ranges for year_month in Tourists table
+SELECT *
+FROM Tourists
+WHERE year_month < '2014-01' OR year_month > '2024-12';
+
+
+

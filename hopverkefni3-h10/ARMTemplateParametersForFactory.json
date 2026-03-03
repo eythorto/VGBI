@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "hopverkefni3-h10"
+		},
+		"src_db_password": {
+			"value": ""
+		},
+		"vh_db_password": {
+			"value": ""
+		},
+		"src_db_properties_typeProperties_server": {
+			"value": "vgbi2026-trans.duckdns.org"
+		},
+		"src_db_properties_typeProperties_database": {
+			"value": "registerdb"
+		},
+		"src_db_properties_typeProperties_username": {
+			"value": "h10user"
+		},
+		"vh_db_properties_typeProperties_server": {
+			"value": "vgbi2026-vh.duckdns.org"
+		},
+		"vh_db_properties_typeProperties_database": {
+			"value": "vh_h10"
+		},
+		"vh_db_properties_typeProperties_username": {
+			"value": "h10user"
+		}
+	}
+}

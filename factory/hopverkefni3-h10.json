@@ -1,0 +1,9 @@
+{
+	"name": "hopverkefni3-h10",
+	"location": "norwayeast",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "2304a04e-a764-47ae-ba4a-16336f6b9319",
+		"tenantId": "94d92b60-e6fa-43c0-8005-e73e02812c34"
+	}
+}

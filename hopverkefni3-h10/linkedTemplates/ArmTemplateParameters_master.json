@@ -20,6 +20,9 @@
 		"src_db_properties_typeProperties_username": {
 			"value": "h10user"
 		},
+		"src_products_properties_typeProperties_url": {
+			"value": "http://vgbi2026-api.duckdns.org:31234/products/"
+		},
 		"vh_db_properties_typeProperties_server": {
 			"value": "vgbi2026-vh.duckdns.org"
 		},

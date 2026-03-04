@@ -1,0 +1,48 @@
+{
+	"name": "src_dimproduct_v1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "src_products",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "src"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "HttpServerLocation"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer"
+				},
+				"name": {
+					"type": "string"
+				},
+				"category": {
+					"type": "string"
+				},
+				"cost": {
+					"type": "string"
+				},
+				"price": {
+					"type": "string"
+				},
+				"seasonality_flag": {
+					"type": "string"
+				},
+				"freshness_days": {
+					"type": "integer"
+				},
+				"shelf_life_days": {
+					"type": "integer"
+				}
+			}
+		}
+	}
+}

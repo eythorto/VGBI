@@ -12,7 +12,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "dimStore_v1_sub",
+						"referenceName": "dimProduct_v1_sub",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true

@@ -1,0 +1,12 @@
+{
+	"name": "src_products",
+	"properties": {
+		"annotations": [],
+		"type": "HttpServer",
+		"typeProperties": {
+			"url": "http://vgbi2026-api.duckdns.org:31234/products/",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "Anonymous"
+		}
+	}
+}

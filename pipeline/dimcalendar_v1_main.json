@@ -33,13 +33,33 @@
 					"secureInput": false
 				},
 				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "vh_db",
+					"type": "LinkedServiceReference"
+				},
 				"typeProperties": {
-					"scripts": [],
+					"scripts": [
+						{
+							"parameters": [
+								{
+									"name": "p_batchid",
+									"type": "Int32",
+									"value": {
+										"value": "@activity('Sub').output.pipelineReturnValue.batchid",
+										"type": "Expression"
+									},
+									"direction": "Input"
+								}
+							],
+							"type": "Query",
+							"text": "call job.sp_batchfail(@p_batchid);"
+						}
+					],
 					"scriptBlockExecutionTimeout": "02:00:00"
 				}
 			},
 			{
-				"name": "Fail1",
+				"name": "Batch Fail End",
 				"type": "Fail",
 				"dependsOn": [
 					{
@@ -49,7 +69,11 @@
 						]
 					}
 				],
-				"userProperties": []
+				"userProperties": [],
+				"typeProperties": {
+					"message": "@concat('Villa í ', pipeline().Pipeline, ' - Villa:', activity('Sub').error.Message)",
+					"errorCode": "500"
+				}
 			}
 		],
 		"folder": {

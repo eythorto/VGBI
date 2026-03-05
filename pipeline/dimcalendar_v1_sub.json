@@ -22,8 +22,45 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"enableStaging": false
-				}
+					"source": {
+						"type": "AzurePostgreSqlSource",
+						"additionalColumns": [
+							{
+								"name": "rowBatchId",
+								"value": "@variables('batchid')"
+							}
+						],
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "AzurePostgreSqlSink",
+						"writeBatchSize": 1000000,
+						"writeBatchTimeout": "00:30:00",
+						"writeMethod": "CopyCommand"
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "src_transaction_sales",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "trg_dimcalendar_v1",
+						"type": "DatasetReference"
+					}
+				]
 			},
 			{
 				"name": "Batch Start",
@@ -87,8 +124,25 @@
 					"secureInput": false
 				},
 				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "vh_db",
+					"type": "LinkedServiceReference"
+				},
 				"typeProperties": {
-					"scripts": [],
+					"scripts": [
+						{
+							"parameters": [
+								{
+									"name": "p_batchid",
+									"type": "Int32",
+									"value": "@variables('batchid')",
+									"direction": "Input"
+								}
+							],
+							"type": "Query",
+							"text": "staging.sp_dimProduct_v1_postprocess(@p_batchid);"
+						}
+					],
 					"scriptBlockExecutionTimeout": "02:00:00"
 				}
 			},
@@ -111,8 +165,25 @@
 					"secureInput": false
 				},
 				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "vh_db",
+					"type": "LinkedServiceReference"
+				},
 				"typeProperties": {
-					"scripts": [],
+					"scripts": [
+						{
+							"parameters": [
+								{
+									"name": "p_batchid",
+									"type": "Int32",
+									"value": "@variables('batchid')",
+									"direction": "Input"
+								}
+							],
+							"type": "Query",
+							"text": "staging.sp_dimProduct_v1_publish(@p_batchid);"
+						}
+					],
 					"scriptBlockExecutionTimeout": "02:00:00"
 				}
 			},
@@ -135,8 +206,25 @@
 					"secureInput": false
 				},
 				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "vh_db",
+					"type": "LinkedServiceReference"
+				},
 				"typeProperties": {
-					"scripts": [],
+					"scripts": [
+						{
+							"parameters": [
+								{
+									"name": "p_batchid",
+									"type": "Int32",
+									"value": "@variables('batchid')",
+									"direction": "Input"
+								}
+							],
+							"type": "Query",
+							"text": "call job.sp_batchend(@p_batchid);"
+						}
+					],
 					"scriptBlockExecutionTimeout": "02:00:00"
 				}
 			},
@@ -198,6 +286,11 @@
 		"parameters": {
 			"batchid": {
 				"type": "int"
+			}
+		},
+		"variables": {
+			"batchid": {
+				"type": "Integer"
 			}
 		},
 		"folder": {

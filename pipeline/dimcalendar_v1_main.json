@@ -11,6 +11,10 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"pipeline": {
+						"referenceName": "dimProduct_v1_sub",
+						"type": "PipelineReference"
+					},
 					"waitOnCompletion": true
 				}
 			},
@@ -71,7 +75,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
-					"message": "@concat('Villa í ', pipeline().Pipeline, ' - Villa:', activity('Sub').error.Message)",
+					"message": {
+						"value": "@concat('Villa í ', pipeline().Pipeline, ' - Villa:', activity('Sub').error.Message)",
+						"type": "Expression"
+					},
 					"errorCode": "500"
 				}
 			}

@@ -1,0 +1,60 @@
+{
+	"name": "dimcalendar_v1_main",
+	"properties": {
+		"activities": [
+			{
+				"name": "Sub",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Batch fail",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Sub",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"scripts": [],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "Fail1",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "Batch fail",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": []
+			}
+		],
+		"folder": {
+			"name": "dimcalendar"
+		},
+		"annotations": []
+	}
+}

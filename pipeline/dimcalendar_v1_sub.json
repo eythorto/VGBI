@@ -27,9 +27,13 @@
 						"additionalColumns": [
 							{
 								"name": "rowBatchId",
-								"value": "@variables('batchid')"
+								"value": {
+									"value": "@variables('batchid')",
+									"type": "Expression"
+								}
 							}
 						],
+						"query": "SELECT\n    MIN(id)::integer AS id,\n    date,\n    EXTRACT(YEAR FROM date)::int AS year,\n    EXTRACT(MONTH FROM date)::int AS monthNo,\n    EXTRACT(WEEK FROM date)::int AS weekNo,\n    TO_CHAR(date, 'YYYY-MM') AS yyyy_mm,\n    TO_CHAR(date, 'IYYY-IW') AS yyyy_ww,\n    EXTRACT(DAY FROM date)::int AS dayofMonth,\n    EXTRACT(DOY FROM date)::int AS dayofYear,\n    1 AS rowBatchId\nFROM source_table\nGROUP BY date;",
 						"partitionOption": "None",
 						"queryTimeout": "02:00:00"
 					},
@@ -135,7 +139,10 @@
 								{
 									"name": "p_batchid",
 									"type": "Int32",
-									"value": "@variables('batchid')",
+									"value": {
+										"value": "@variables('batchid')",
+										"type": "Expression"
+									},
 									"direction": "Input"
 								}
 							],
@@ -176,7 +183,10 @@
 								{
 									"name": "p_batchid",
 									"type": "Int32",
-									"value": "@variables('batchid')",
+									"value": {
+										"value": "@variables('batchid')",
+										"type": "Expression"
+									},
 									"direction": "Input"
 								}
 							],
@@ -217,7 +227,10 @@
 								{
 									"name": "p_batchid",
 									"type": "Int32",
-									"value": "@variables('batchid')",
+									"value": {
+										"value": "@variables('batchid')",
+										"type": "Expression"
+									},
 									"direction": "Input"
 								}
 							],

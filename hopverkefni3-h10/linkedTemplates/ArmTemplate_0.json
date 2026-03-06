@@ -1894,7 +1894,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"pipeline": {
-								"referenceName": "dimProduct_v1_sub",
+								"referenceName": "dimcalendar_v1_sub",
 								"type": "PipelineReference"
 							},
 							"waitOnCompletion": true,
@@ -1975,7 +1975,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/dimProduct_v1_sub')]",
+				"[concat(variables('factoryId'), '/pipelines/dimcalendar_v1_sub')]",
 				"[concat(variables('factoryId'), '/linkedServices/vh_db')]"
 			]
 		}

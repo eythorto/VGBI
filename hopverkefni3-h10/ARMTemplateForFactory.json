@@ -1207,7 +1207,7 @@
 									}
 								],
 								"query": {
-									"value": "SELECT\n    MIN(id)::integer AS id,\n    date,\n    EXTRACT(YEAR FROM date)::int AS year,\n    EXTRACT(MONTH FROM date)::int AS monthNo,\n    EXTRACT(WEEK FROM date)::int AS weekNo,\n    TO_CHAR(date, 'YYYY-MM') AS yyyy_mm,\n    TO_CHAR(date, 'IYYY-IW') AS yyyy_ww,\n    EXTRACT(DAY FROM date)::int AS dayofMonth,\n    EXTRACT(DOY FROM date)::int AS dayofYear,\n    @{pipeline().parameters.batchId}::integer AS \"rowBatchId\"\nFROM transactions.sales\nGROUP BY date\nORDER BY date;",
+									"value": "SELECT\n    MIN(id) AS id,\n    date,\n    EXTRACT(YEAR FROM date) AS year,\n    EXTRACT(MONTH FROM date) AS monthNo,\n    EXTRACT(WEEK FROM date) AS weekNo,\n    TO_CHAR(date, 'YYYY-MM') AS yyyy_mm,\n    TO_CHAR(date, 'IYYY-IW') AS yyyy_ww,\n    EXTRACT(DAY FROM date) AS dayofMonth,\n    EXTRACT(DOY FROM date) AS dayofYear,\n    CAST(@{pipeline().parameters.batchId} AS integer) AS \"rowBatchId\"\nFROM transactions.sales\nGROUP BY date\nORDER BY date;",
 									"type": "Expression"
 								},
 								"partitionOption": "None",

@@ -27,6 +27,10 @@ CREATE TABLE IF NOT EXISTS public.dimStore
     CONSTRAINT uq_dimStore_id UNIQUE (id)
 );
 
+INSERT INTO public.dimStore (id, name, city, country, location, open_date, rowBatchId)
+VALUES
+    (-1, 'Unknown', 'Unknown', 'Unknown', 'Unknown', '2010-10-10', -1);
+
 CREATE OR REPLACE PROCEDURE staging.sp_dimStore_v1_publish (IN p_batchid integer)
 LANGUAGE plpgsql
 AS $$

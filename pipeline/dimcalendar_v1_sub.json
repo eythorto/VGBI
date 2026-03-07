@@ -83,7 +83,7 @@
 								}
 							],
 							"type": "Query",
-							"text": "public.sp_dimCalendar_generate(@p_batchid);"
+							"text": "call public.sp_dimCalendar_generate(@p_batchid);"
 						}
 					],
 					"scriptBlockExecutionTimeout": "02:00:00"

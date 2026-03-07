@@ -3,69 +3,6 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "EL",
-				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "batchid",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "AzurePostgreSqlSource",
-						"additionalColumns": [
-							{
-								"name": "rowBatchId",
-								"value": {
-									"value": "@variables('batchid')",
-									"type": "Expression"
-								}
-							}
-						],
-						"partitionOption": "None",
-						"queryTimeout": "02:00:00"
-					},
-					"sink": {
-						"type": "AzurePostgreSqlSink",
-						"writeBatchSize": 1000000,
-						"writeBatchTimeout": "00:30:00",
-						"writeMethod": "CopyCommand"
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "src_transaction_sales",
-						"type": "DatasetReference"
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "trg_dimcalendar_v1",
-						"type": "DatasetReference"
-					}
-				]
-			},
-			{
 				"name": "Batch Start",
 				"type": "Script",
 				"dependsOn": [],
@@ -109,55 +46,11 @@
 				}
 			},
 			{
-				"name": "Post Process",
-				"type": "Script",
-				"dependsOn": [
-					{
-						"activity": "Publish",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"linkedServiceName": {
-					"referenceName": "vh_db",
-					"type": "LinkedServiceReference"
-				},
-				"typeProperties": {
-					"scripts": [
-						{
-							"parameters": [
-								{
-									"name": "p_batchid",
-									"type": "Int32",
-									"value": {
-										"value": "@variables('batchid')",
-										"type": "Expression"
-									},
-									"direction": "Input"
-								}
-							],
-							"type": "Query",
-							"text": "staging.sp_dimProduct_v1_postprocess(@p_batchid);"
-						}
-					],
-					"scriptBlockExecutionTimeout": "02:00:00"
-				}
-			},
-			{
 				"name": "Publish",
 				"type": "Script",
 				"dependsOn": [
 					{
-						"activity": "EL",
+						"activity": "batchid",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -190,7 +83,7 @@
 								}
 							],
 							"type": "Query",
-							"text": "staging.sp_dimProduct_v1_publish(@p_batchid);"
+							"text": "public.sp_dimCalendar_generate(@p_batchid);"
 						}
 					],
 					"scriptBlockExecutionTimeout": "02:00:00"
@@ -201,7 +94,7 @@
 				"type": "Script",
 				"dependsOn": [
 					{
-						"activity": "Post Process",
+						"activity": "Publish",
 						"dependencyConditions": [
 							"Succeeded"
 						]

@@ -1,0 +1,91 @@
+{
+	"name": "factSales_v1_main",
+	"properties": {
+		"activities": [
+			{
+				"name": "Sub",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "factSales_v1_sub",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Batch Fail",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Sub",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "vh_db",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"parameters": [
+								{
+									"name": "p_batchid",
+									"type": "Int32",
+									"value": {
+										"value": "@activity('Sub').output.pipelineReturnValue.batchid",
+										"type": "Expression"
+									},
+									"direction": "Input"
+								}
+							],
+							"type": "Query",
+							"text": "call job.sp_batchfail(@p_batchid);"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "Batch Fail End",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "Batch Fail",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": {
+						"value": "@concat('Villa í ', pipeline().Pipeline, ' - Villa:', activity('Sub').error.Message)",
+						"type": "Expression"
+					},
+					"errorCode": "500"
+				}
+			}
+		],
+		"folder": {
+			"name": "factSales"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,62 @@
+{
+	"name": "trg_factInventory_v1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "vh_db",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "trg"
+		},
+		"annotations": [],
+		"type": "AzurePostgreSqlTable",
+		"schema": [
+			{
+				"name": "id",
+				"type": "bigint",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "store_id",
+				"type": "integer",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "product_id",
+				"type": "integer",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "snapshot_date",
+				"type": "timestamp with time zone",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "stock_on_hand",
+				"type": "integer",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "rowbatchid",
+				"type": "integer",
+				"precision": 0,
+				"scale": 0
+			},
+			{
+				"name": "rowcreated",
+				"type": "timestamp with time zone",
+				"precision": 0,
+				"scale": 0
+			}
+		],
+		"typeProperties": {
+			"schema": "staging",
+			"table": "factinventory_v1"
+		}
+	}
+}

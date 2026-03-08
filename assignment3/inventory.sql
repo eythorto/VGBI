@@ -27,10 +27,37 @@ CREATE OR REPLACE PROCEDURE staging.sp_factInventory_v1_publish (IN p_batchid in
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    /*
-    eitt stock_on_hand er neikvætt
-    nokkur store_id eru ekki til. setja id sem -1 "Unknown Store"
-    */
+    INSERT INTO public.dataqualityerrors (
+        table_name,
+        row_id,
+        error_description,
+        rowBatchId
+    )
+    SELECT 
+        'factInventory',
+        id,
+        CONCAT('Negative stock_on_hand: ', stock_on_hand, ' for store_id: ', store_id, ', product_id: ', product_id),
+        rowBatchId
+    FROM staging.factInventory_v1
+    WHERE rowBatchId = p_batchid
+      AND stock_on_hand < 0;
+    
+    INSERT INTO public.dataqualityerrors (
+        table_name,
+        row_id,
+        error_description,
+        rowBatchId
+    )
+    SELECT 
+        'factInventory',
+        inv.id,
+        CONCAT('Invalid store_id: ', inv.store_id, ' does not exist in dimStore. Setting to -1 (Unknown Store) for product_id: ', inv.product_id),
+        inv.rowBatchId
+    FROM staging.factInventory_v1 inv
+    LEFT JOIN public.dimStore ds ON inv.store_id = ds.id
+    WHERE inv.rowBatchId = p_batchid
+      AND ds.id IS NULL;
+    
     INSERT INTO public.factInventory (
         store_id,
         product_id,
@@ -39,13 +66,17 @@ BEGIN
         rowBatchId
     )
     SELECT 
-        store_id,
-        product_id,
-        stock_on_hand,
-        snapshot_date,
-        rowBatchId
-    FROM staging.factInventory_v1
-    WHERE rowBatchId = p_batchid;
+        CASE 
+            WHEN ds.id IS NULL THEN -1  -- Use -1 for unknown stores
+            ELSE inv.store_id
+        END AS store_id,
+        inv.product_id,
+        inv.stock_on_hand,
+        inv.snapshot_date,
+        inv.rowBatchId
+    FROM staging.factInventory_v1 inv
+    LEFT JOIN public.dimStore ds ON inv.store_id = ds.id
+    WHERE inv.rowBatchId = p_batchid;
 END;
 $$;
 

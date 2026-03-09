@@ -83,9 +83,9 @@ BEGIN
         fs.product_id,
         fs.receipt,
         fs.units_sold,
-        fs.units_sold * COALESCE(dp.price, 0) AS amount_sold,
-        fs.units_sold * COALESCE(dp.cost, 0) AS amount_cost,
-        (fs.units_sold * COALESCE(dp.price, 0)) - (fs.units_sold * COALESCE(dp.cost, 0)) AS profit,
+        COALESCE(fs.units_sold * dp.price, NULL) AS amount_sold,
+        COALESCE(fs.units_sold * dp.cost, NULL) AS amount_cost,
+        COALESCE((fs.units_sold * dp.price) - (fs.units_sold * dp.cost), NULL) AS profit,
         fs.rowBatchId,
         fs.rowCreated
     FROM staging.factSales_v1 fs

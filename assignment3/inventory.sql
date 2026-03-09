@@ -18,26 +18,12 @@ CREATE TABLE IF NOT EXISTS public.factInventory (
     rowBatchId integer NOT NULL,
     rowCreated timestamptz NOT NULL DEFAULT timezone('utc', now()),
 
-    CONSTRAINT factInventory_pkey PRIMARY KEY (id)
-    FOREIGN KEY (store_id) REFERENCES public.dimStore (id)
+    CONSTRAINT factInventory_pkey PRIMARY KEY (id),
+    FOREIGN KEY (store_id) REFERENCES public.dimStore (id),
     FOREIGN KEY (product_id) REFERENCES public.dimProduct (id)
 );
 
 CREATE INDEX IF NOT EXISTS ix_factInventory_store_product_date ON public.factInventory USING btree (store_id, product_id, snapshot_date);
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM pg_constraint
-        WHERE conname = 'fk_factInventory_store'
-    ) THEN
-        ALTER TABLE public.factInventory
-        ADD CONSTRAINT fk_factInventory_store
-            FOREIGN KEY (store_id)
-            REFERENCES public.dimStore (id);
-    END IF;
-END;
-$$;
 
 CREATE OR REPLACE PROCEDURE staging.sp_factInventory_v1_publish (IN p_batchid integer)
 LANGUAGE plpgsql

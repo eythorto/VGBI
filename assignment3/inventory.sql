@@ -78,12 +78,12 @@ BEGIN
     )
     SELECT 
         'factInventory',
-        inv.id,
-        CONCAT('Invalid store_id: ', inv.store_id, ' does not exist in dimStore. Setting to -1 (Unknown Store) for product_id: ', inv.product_id),
-        inv.rowBatchId
-    FROM staging.factInventory_v1 inv
-    LEFT JOIN public.dimStore ds ON inv.store_id = ds.id
-    WHERE inv.rowBatchId = p_batchid
+        inventory.id,
+        CONCAT('Invalid store_id: ', inventory.store_id, ' does not exist in dimStore. Setting to -1 (Unknown Store) for product_id: ', inventory.product_id),
+        inventory.rowBatchId
+    FROM staging.factInventory_v1 inventory
+    LEFT JOIN public.dimStore ds ON inventory.store_id = ds.id
+    WHERE inventory.rowBatchId = p_batchid
       AND ds.id IS NULL;
     
     INSERT INTO public.factInventory (
@@ -96,15 +96,15 @@ BEGIN
     SELECT 
         CASE 
             WHEN ds.id IS NULL THEN -1  -- Use -1 for unknown stores
-            ELSE inv.store_id
+            ELSE inventory.store_id
         END AS store_id,
-        inv.product_id,
-        inv.stock_on_hand,
-        inv.snapshot_date,
-        inv.rowBatchId
-    FROM staging.factInventory_v1 inv
-    LEFT JOIN public.dimStore ds ON inv.store_id = ds.id
-    WHERE inv.rowBatchId = p_batchid;
+        inventory.product_id,
+        inventory.stock_on_hand,
+        inventory.snapshot_date,
+        inventory.rowBatchId
+    FROM staging.factInventory_v1 inventory
+    LEFT JOIN public.dimStore ds ON inventory.store_id = ds.id
+    WHERE inventory.rowBatchId = p_batchid;
 END;
 $$;
 

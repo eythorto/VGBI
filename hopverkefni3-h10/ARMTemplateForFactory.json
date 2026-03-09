@@ -1871,6 +1871,518 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/factSales_v1_main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Sub",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "factSales_v1_sub",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Batch Fail",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "Sub",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "vh_db",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"parameters": [
+										{
+											"name": "p_batchid",
+											"type": "Int32",
+											"value": {
+												"value": "@activity('Sub').output.pipelineReturnValue.batchid",
+												"type": "Expression"
+											},
+											"direction": "Input"
+										}
+									],
+									"type": "Query",
+									"text": "call job.sp_batchfail(@p_batchid);"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "Batch Fail End",
+						"type": "Fail",
+						"dependsOn": [
+							{
+								"activity": "Batch Fail",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"message": {
+								"value": "@concat('Villa í ', pipeline().Pipeline, ' - Villa:', activity('Sub').error.Message)",
+								"type": "Expression"
+							},
+							"errorCode": "500"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "factSales"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/factSales_v1_sub')]",
+				"[concat(variables('factoryId'), '/linkedServices/vh_db')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/factSales_v1_sub')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "EL",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "batchid",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzurePostgreSqlSource",
+								"additionalColumns": [
+									{
+										"name": "rowBatchId",
+										"value": {
+											"value": "@variables('batchid')",
+											"type": "Expression"
+										}
+									}
+								],
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"sink": {
+								"type": "AzurePostgreSqlSink",
+								"writeBatchSize": 1000000,
+								"writeBatchTimeout": "00:30:00",
+								"writeMethod": "CopyCommand"
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "id",
+											"type": "Int64",
+											"physicalType": "bigint"
+										},
+										"sink": {
+											"name": "id",
+											"type": "Int64",
+											"physicalType": "bigint"
+										}
+									},
+									{
+										"source": {
+											"name": "store_id",
+											"type": "Int32",
+											"physicalType": "integer"
+										},
+										"sink": {
+											"name": "store_id",
+											"type": "Int32",
+											"physicalType": "integer"
+										}
+									},
+									{
+										"source": {
+											"name": "product_id",
+											"type": "Int32",
+											"physicalType": "integer"
+										},
+										"sink": {
+											"name": "product_id",
+											"type": "Int32",
+											"physicalType": "integer"
+										}
+									},
+									{
+										"source": {
+											"name": "unitssold",
+											"type": "integer",
+											"physicalType": "integer",
+											"scale": 0,
+											"precision": 0
+										},
+										"sink": {
+											"name": "units_sold",
+											"type": "integer",
+											"scale": 0,
+											"precision": 0
+										}
+									},
+									{
+										"source": {
+											"name": "receipt",
+											"type": "character varying",
+											"physicalType": "character varying",
+											"scale": 0,
+											"precision": 0
+										},
+										"sink": {
+											"name": "receipt",
+											"type": "character varying",
+											"scale": 0,
+											"precision": 0
+										}
+									},
+									{
+										"source": {
+											"name": "date",
+											"type": "date",
+											"physicalType": "date",
+											"scale": 0,
+											"precision": 0
+										},
+										"sink": {
+											"name": "date"
+										}
+									},
+									{
+										"source": {
+											"name": "rowBatchId"
+										},
+										"sink": {
+											"name": "rowbatchid",
+											"type": "integer",
+											"scale": 0,
+											"precision": 0
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "src_transaction_sales",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "trg_factSales_v1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "Batch Start",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "vh_db",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"parameters": [
+										{
+											"name": "p_jobname",
+											"type": "String",
+											"value": {
+												"value": "@pipeline().Pipeline",
+												"type": "Expression"
+											},
+											"direction": "Input"
+										},
+										{
+											"name": "p_batchid",
+											"type": "Int32",
+											"value": null,
+											"direction": "InputOutput"
+										}
+									],
+									"type": "Query",
+									"text": "call job.sp_batchstart(@p_jobname, @p_batchid);"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "Publish",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "EL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "vh_db",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"parameters": [
+										{
+											"name": "p_batchid",
+											"type": "Int32",
+											"value": {
+												"value": "@variables('batchid')",
+												"type": "Expression"
+											},
+											"direction": "Input"
+										}
+									],
+									"type": "Query",
+									"text": "call staging.sp_factSales_v1_publish(@p_batchid);"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "Post Process",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "Publish",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "vh_db",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"parameters": [
+										{
+											"name": "p_batchid",
+											"type": "Int32",
+											"value": {
+												"value": "@variables('batchid')",
+												"type": "Expression"
+											},
+											"direction": "Input"
+										}
+									],
+									"type": "Query",
+									"text": "call staging.sp_factSales_v1_postprocess(@p_batchid);"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "Batch End",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "Post Process",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "vh_db",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"parameters": [
+										{
+											"name": "p_batchid",
+											"type": "Int32",
+											"value": {
+												"value": "@variables('batchid')",
+												"type": "Expression"
+											},
+											"direction": "Input"
+										}
+									],
+									"type": "Query",
+									"text": "call job.sp_batchend(@p_batchid);"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "batchid",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Batch Start",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "batchid",
+							"value": {
+								"value": "@activity('Batch Start').output.outputParameters.p_batchid",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "batchid output",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "batchid",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "pipelineReturnValue",
+							"value": [
+								{
+									"key": "batchid",
+									"value": {
+										"type": "Expression",
+										"content": "@variables('batchid')"
+									}
+								}
+							],
+							"setSystemVariable": true
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"batchid": {
+						"type": "Integer"
+					}
+				},
+				"folder": {
+					"name": "factSales"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/src_transaction_sales')]",
+				"[concat(variables('factoryId'), '/datasets/trg_factSales_v1')]",
+				"[concat(variables('factoryId'), '/linkedServices/vh_db')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/src_dimproduct_v1')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -2404,6 +2916,73 @@
 				"typeProperties": {
 					"schema": "staging",
 					"table": "factinventory_v1"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/vh_db')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/trg_factSales_v1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "vh_db",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "trg"
+				},
+				"annotations": [],
+				"type": "AzurePostgreSqlTable",
+				"schema": [
+					{
+						"name": "id",
+						"type": "bigint",
+						"precision": 0,
+						"scale": 0
+					},
+					{
+						"name": "store_id",
+						"type": "integer",
+						"precision": 0,
+						"scale": 0
+					},
+					{
+						"name": "product_id",
+						"type": "integer",
+						"precision": 0,
+						"scale": 0
+					},
+					{
+						"name": "receipt",
+						"type": "character varying",
+						"precision": 0,
+						"scale": 0
+					},
+					{
+						"name": "units_sold",
+						"type": "integer",
+						"precision": 0,
+						"scale": 0
+					},
+					{
+						"name": "rowbatchid",
+						"type": "integer",
+						"precision": 0,
+						"scale": 0
+					},
+					{
+						"name": "rowcreated",
+						"type": "timestamp with time zone",
+						"precision": 0,
+						"scale": 0
+					}
+				],
+				"typeProperties": {
+					"schema": "staging",
+					"table": "factsales_v1"
 				}
 			},
 			"dependsOn": [

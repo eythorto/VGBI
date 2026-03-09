@@ -19,14 +19,42 @@ CREATE TABLE IF NOT EXISTS public.factInventory (
     rowCreated timestamptz NOT NULL DEFAULT timezone('utc', now()),
 
     CONSTRAINT factInventory_pkey PRIMARY KEY (id)
+    FOREIGN KEY (store_id) REFERENCES public.dimStore (id)
+    FOREIGN KEY (product_id) REFERENCES public.dimProduct (id)
 );
 
 CREATE INDEX IF NOT EXISTS ix_factInventory_store_product_date ON public.factInventory USING btree (store_id, product_id, snapshot_date);
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = 'fk_factInventory_store'
+    ) THEN
+        ALTER TABLE public.factInventory
+        ADD CONSTRAINT fk_factInventory_store
+            FOREIGN KEY (store_id)
+            REFERENCES public.dimStore (id);
+    END IF;
+END;
+$$;
 
 CREATE OR REPLACE PROCEDURE staging.sp_factInventory_v1_publish (IN p_batchid integer)
 LANGUAGE plpgsql
 AS $$
 BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM public.factInventory fi
+        INNER JOIN (
+            SELECT DISTINCT snapshot_date
+            FROM staging.factInventory_v1
+            WHERE rowBatchId = p_batchid
+        ) src_dates ON fi.snapshot_date = src_dates.snapshot_date
+    ) THEN
+        RAISE EXCEPTION 'Load failed: data already exists in factInventory for one or more snapshot_date values in batch %.', p_batchid;
+    END IF;
+
     INSERT INTO public.dataqualityerrors (
         table_name,
         row_id,
